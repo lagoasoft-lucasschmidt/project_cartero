@@ -1,8 +1,28 @@
 {
   "name": "project-cartero",
   "version": "0.0.1",
-  "description": "",
+  "description": "Web application assets manager. See cartero for more info.",
+
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/lucastschmidt/project_cartero.git"
+  },
+  "bugs": {
+    "url": "https://github.com/lucastschmidt/project_cartero/issues"
+  },
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "https://github.com/lucastschmidtproject_cartero/blob/master/LICENSE-MIT"
+    }
+  ],
+
   "main": "Gruntfile.coffee",
+  "homepage": "https://github.com/lucastschmidt/project_cartero",
+  "author": {
+    "name": "Lucas Schmidt",
+    "email": "lucastschmidt.dev@gmail.com"
+  },
   "engines": {
     "node": ">= 0.8.0"
   },
@@ -34,5 +54,8 @@
   },
   "peerDependencies": {
     "grunt": "~0.4.4"
-  }
+  },
+  "keywords": [
+    "gruntplugin", "cartero", "assets manager", "assets"
+  ]
 }
