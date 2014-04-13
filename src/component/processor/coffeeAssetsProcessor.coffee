@@ -21,7 +21,7 @@ class CoffeeAssetsProcessor extends AssetsProcessor
     .spread (filesToDelete, otherFilesToDelete)=>
       filesToDelete = filesToDelete.concat otherFilesToDelete
       @deleteSrcFiles filesToDelete
-      @info msg: "Successfully runned CoffeeAssetsProcessor"
+      @debug msg: "Successfully runned CoffeeAssetsProcessor"
       callback(null, carteroJSON)
     .fail (error)=>
       @error msg:"rror while trying to run CoffeeAssetsProcessor", error: error
@@ -50,6 +50,10 @@ class CoffeeAssetsProcessor extends AssetsProcessor
         if fileExtension(file.path) is "coffee"
           dest = @renameDestinationFile(file.path)
           files.push src:file.path, dest:dest
+          relativeLibPath = path.relative path.resolve(@options.librariesDestinationPath, "library-assets", library.id), file.path
+          if _.contains(library.bundleJSON.dynamicallyLoadedFiles, relativeLibPath)
+            index = library.bundleJSON.dynamicallyLoadedFiles.indexOf(relativeLibPath)
+            library.bundleJSON.dynamicallyLoadedFiles[index] = path.relative path.resolve(@options.librariesDestinationPath, "library-assets", library.id), dest
           file.path = dest
       for otherLibId in library.dependencies
         otherLib = carteroJSON.libraries[otherLibId]

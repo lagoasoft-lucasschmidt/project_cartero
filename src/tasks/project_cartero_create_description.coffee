@@ -9,10 +9,15 @@ module.exports = (grunt)->
 
     done = @async()
     options = @options({})
-    templatesBuilder = new TemplatesDescriptorBuilder(options)
-    carteroFileBuilder = new CarteroFileDescriptorBuilder(options)
+    try
+      templatesBuilder = new TemplatesDescriptorBuilder(options)
+      carteroFileBuilder = new CarteroFileDescriptorBuilder(options)
+    catch e
+      grunt.log.error e.stack
+      return done(e)
 
     templatesBuilder.buildTemplatesDescriptors (error, data)->
       if error then return done(error)
       carteroFileBuilder.createFile data.templates, data.libraries, (error, filePath)->
+        grunt.log.error error.stack if error?
         done(error)

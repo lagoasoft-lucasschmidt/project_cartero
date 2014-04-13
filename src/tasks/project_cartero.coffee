@@ -10,7 +10,7 @@ defaultOptions =
   publicFilesPath : null
   contextPath: null # used if your application or public dir runs in a different contextPath in your web application
   librariesPublicRelativePath: "libraries"
-  libraryFilesExtensions: /.*\.(coffee|js|css|less|jpg|jpeg|tiff|gif|png|bmp|swf)$/
+  libraryFilesExtensions: /.*\.(coffee|js|css|less|jpg|jpeg|tiff|gif|png|bmp|swf|eot|svg|ttf|woff)$/
 
   carteroFileDescriptorPath: null
   carteroFileDescriptorName: "cartero"

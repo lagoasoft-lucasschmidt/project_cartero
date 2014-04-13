@@ -1,6 +1,6 @@
-ConcatFilesAssetsProcessor = require "./base/concatFilesAssetsProcessor"
+BaseConcatFilesAssetsProcessor = require "./baseConcatFilesAssetsProcessor"
 
-class ConcatCssAssetsProcessor extends ConcatFilesAssetsProcessor
+class ConcatCssAssetsProcessor extends BaseConcatFilesAssetsProcessor
   constructor:(grunt, options)->
     super("CONCAT_CSS_ASSETS_PROCESSOR", ["css"], "css", grunt, options)
 

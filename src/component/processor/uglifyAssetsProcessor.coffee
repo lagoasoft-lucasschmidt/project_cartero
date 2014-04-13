@@ -19,7 +19,7 @@ class UglifyAssetsProcessor extends AssetsProcessor
       promises.push @uglifyViewsAssets(carteroJSON)
       Q.all(promises)
     .then ()=>
-      @info msg: "Successfully runned UglifyAssetsProcessor"
+      @debug msg: "Successfully runned UglifyAssetsProcessor"
       callback(null, carteroJSON)
     .fail (error)=>
       @error msg:"rror while trying to run UglifyAssetsProcessor", error: error

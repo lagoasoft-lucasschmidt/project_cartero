@@ -28,7 +28,7 @@ class DefaultCarteroFileDescriptorBuilder extends CarteroFileDescriptorBuilder
       carteroJson.templates[template.filePath] = template for template in templates
       saveCarteroJSON(carteroJson, @options)
       .then ()=>
-        @info "Successfully wrote Cartero File Descritor on #{filePath}"
+        @debug "Successfully wrote Cartero File Descritor on #{filePath}"
         callback(null, filePath)
     .fail (error)=>
       @error msg: "Error while trying to create Cartero File Descritor", error:error

@@ -111,16 +111,18 @@ class DefaultLibraryCreator extends LibraryCreator
     @trace "Trying to create library files for library id=#{libraryId} in folders=#{folders}"
     findFilesInFolders(folders, options.libraryFilesExtensions)
     .then (filePaths)=>
+      dynamicallyLoadedFiles = _.map bundleJSON.dynamicallyLoadedFiles, (relativePath)-> path.resolve libraryPath, relativePath
+      filePaths = _.uniq(filePaths.concat(dynamicallyLoadedFiles))
       @trace "Found #{filePaths.length} total of library files in folder of library id=#{libraryId}"
       notIgnoredFiles = _.filter filePaths, (filePath)->
-        ! _.contains(bundleJSON.filesToIgnore, path.relative(libraryPath, filePath.toString()))
+        ! _.contains(bundleJSON.filesToIgnore, path.relative(libraryPath, filePath))
       sortedFiles = @sortLibraryFiles(libraryId, libraryPath, libraries, options, bundleJSON, notIgnoredFiles)
-      return _.map sortedFiles, (filteredFilePath)-> new LibraryFile({type: "LOCAL", path: filteredFilePath.toString()})
+      return _.map sortedFiles, (filteredFilePath)-> new LibraryFile({type: "LOCAL", path: filteredFilePath})
 
-  sortLibraryFiles:(libraryId, libraryPath, libraries, options, bundleJSON, notIgnoredFiles)->
+  sortLibraryFiles:(libraryId, libraryPath, libraries, options, bundleJSON, notIgnoredFiles)=>
     if !( _.isArray(bundleJSON.filePriority) and bundleJSON.filePriority.length > 0 ) then return notIgnoredFiles
-    notIgnoredRelativeFiles = _.map notIgnoredFiles, (filePath)-> path.relative(librariesPath, filePath)
-    notSortedRelativeFiles = _.difference bundleJSON.filePriority, notIgnoredRelativeFiles
+    notIgnoredRelativeFiles = _.map notIgnoredFiles, (filePath)-> path.relative(libraryPath, filePath)
+    notSortedRelativeFiles = _.difference notIgnoredRelativeFiles, bundleJSON.filePriority
     sortedRelativeFiles = _.union bundleJSON.filePriority, notSortedRelativeFiles
     return _.map sortedRelativeFiles, (relativeFilePath)-> path.join(libraryPath, relativeFilePath)
 

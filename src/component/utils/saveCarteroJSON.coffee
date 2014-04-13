@@ -12,6 +12,6 @@ module.exports = (carteroJSON, options)->
     if not exists then return Q.nfcall(mkdirp, options.carteroFileDescriptorPath)
     else return Q.fcall ()->
   .then ()->
-    logger.info "will try to write #{filePath}"
+    logger.debug "will try to write #{filePath}"
     Q.nfcall(fs.writeFile, filePath, JSON.stringify(carteroJSON, null, 2))
 

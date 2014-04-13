@@ -18,7 +18,7 @@ class MoveAssetsProcessor extends AssetsProcessor
       promises.push @moveViewsAssets(carteroJSON)
       Q.all(promises)
     .then ()=>
-      @info msg: "Successfully runned MoveAssetsProcessor"
+      @debug msg: "Successfully runned MoveAssetsProcessor"
       callback(null, carteroJSON)
     .fail (error)=>
       @error msg:"Error while trying to run MoveAssetsProcessor", error: error

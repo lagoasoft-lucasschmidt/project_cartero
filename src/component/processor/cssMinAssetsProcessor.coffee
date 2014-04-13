@@ -19,7 +19,7 @@ class CssMinAssetsProcessor extends AssetsProcessor
       promises.push @cssMinViewsAssets(carteroJSON)
       Q.all(promises)
     .then ()=>
-      @info msg: "Successfully runned CssMinAssetsProcessor"
+      @debug msg: "Successfully runned CssMinAssetsProcessor"
       callback(null, carteroJSON)
     .fail (error)=>
       @error msg:"rror while trying to run CssMinAssetsProcessor", error: error

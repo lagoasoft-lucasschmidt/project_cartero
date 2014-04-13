@@ -29,8 +29,6 @@
   "scripts": {
     "test": "grunt test"
   },
-  "author": "",
-  "license": "ISC",
   "dependencies": {
     "lodash": "^2.4.1",
     "coffee-script": "^1.7.1",

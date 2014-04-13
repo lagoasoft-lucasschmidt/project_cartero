@@ -1,3 +1,9 @@
  ✔ Create CssMinAssetsProcessor @done (14-04-12 15:45)
  ✔ Create ConcatAssetsProcessor @done (14-04-12 18:47)
- ☐ Create Express Hook
+ ✔ Create Express Hook @done (14-04-12 23:25)
+ ✔ Improve Concat job @done (14-04-13 13:14)
+ ✔ Dynamic loaded files shouldnt have to have its folder included, for the file to be available @done (14-04-13 00:02)
+ ☐ Add Express hook into this lib
+ ☐ Create Tests
+ ✔ Fix Logs mode @done (14-04-13 13:39)
+ ☐ Improve REMOTE files ?? check it if it can handle ?queries in the end

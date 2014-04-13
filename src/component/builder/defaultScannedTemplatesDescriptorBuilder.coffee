@@ -1,4 +1,5 @@
 _ = require 'lodash'
+_s = require 'underscore.string'
 Q = require 'q'
 fs = require 'fs'
 path = require 'path'
@@ -63,10 +64,31 @@ class DefaultScannedTemplatesDescriptorBuilder extends ScannedTemplatesDescripto
       carteroExtendsMatches = carteroExtendsRegExp.exec(fileContents)
       if !_.isNull(carteroExtendsMatches)
         return path.join @options.templatesPath, carteroExtendsMatches[1]
-      return null
+      else
+        myRegex = /extends\s.*/g;
+        matches = []
+        while ((partialMatches = myRegex.exec(fileContents)) != null)
+          matches.push partialMatches[0]
+        if !_.isArray(matches) then return null
+        matches = _.map matches, (match)->
+          match = _s.strRight(match, "extends ")
+          return path.resolve filePath, "..", match+".jade"
+        matches = _.filter matches, (match)->
+          return fs.existsSync(match)
+        if matches.length > 0 then return matches[0] else return null
 
   internalFindIncludedTemplates:(filePath, fileContents)=>
-    Q.fcall ()=> []
+    Q.fcall ()=>
+      myRegex = /include\s.*/g;
+      matches = []
+      while ((partialMatches = myRegex.exec(fileContents)) != null)
+        matches.push partialMatches[0]
+      if !_.isArray(matches) then return null
+      matches = _.map matches, (match)->
+        match = _s.strRight(match, "include ")
+        return path.resolve filePath, "..", match+".jade"
+      matches = _.filter matches, (match)->
+        return fs.existsSync(match)
 
   internalFindLibraryDependencies:(filePath, fileContents)=>
     Q.fcall ()=>
@@ -82,6 +104,7 @@ class DefaultScannedTemplatesDescriptorBuilder extends ScannedTemplatesDescripto
       return libraryDependencies
 
   internalFindOwnFiles:(filePath, fileContents)=> findFilesInFolder(path.join(filePath, ".."), @options.templatesOwnFilesExtensions)
+
 
 
 
