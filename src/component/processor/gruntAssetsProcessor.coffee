@@ -8,46 +8,51 @@ AssetsProcessor = require '../../model/assetsProcessor'
 
 mkdirp = require 'mkdirp'
 
-class CoffeeAssetsProcessor extends AssetsProcessor
-  constructor:(grunt, options)->
-    super("COFFEE_ASSETS_PROCESSOR", grunt, options)
+class GruntAssetsProcessor extends AssetsProcessor
+  constructor:(processorOptions, grunt, options)->
+    super("GRUNT_ASSETS_PROCESSOR", grunt, options)
+    @destExt = processorOptions.destExt
+    @fileExt = processorOptions.fileExt
+    @task = processorOptions.task
+    @clean = processorOptions.clean
+
 
   run:(carteroJSON, callback)=>
     Q(null).then ()=>
       promises = []
-      promises.push @coffeeCompileLibraryAssets(carteroJSON)
-      promises.push @coffeeCompileViewsAssets(carteroJSON)
+      promises.push @gruntCompileLibraryAssets(carteroJSON)
+      promises.push @gruntCompileViewsAssets(carteroJSON)
       Q.all(promises)
     .spread (filesToDelete, otherFilesToDelete)=>
       filesToDelete = filesToDelete.concat otherFilesToDelete
       @deleteSrcFiles filesToDelete
-      @debug msg: "Successfully runned CoffeeAssetsProcessor"
+      @debug msg: "Successfully runned GruntAssetsProcessor"
       callback(null, carteroJSON)
     .fail (error)=>
-      @error msg:"rror while trying to run CoffeeAssetsProcessor", error: error
+      @error msg:"rror while trying to run GruntAssetsProcessor", error: error
       callback(new Error(error))
 
 
   renameDestinationFile:(filePath)->
     newPath = path.resolve(filePath, '..')
-    return path.resolve newPath, path.basename(filePath, '.coffee')+".js"
+    return path.resolve newPath, path.basename(filePath, ".#{@fileExt}")+".#{@destExt}"
 
-  coffeeCompileLibraryAssets:(carteroJSON)=>
+  gruntCompileLibraryAssets:(carteroJSON)=>
     Q.fcall ()=>
       processedLibraries = []
       files = []
       for templateId, template of carteroJSON.templates
         for libraryId in template.libraryDependencies
           library = carteroJSON.libraries[libraryId]
-          @coffeeCompileFilesInLibrary(carteroJSON, library, processedLibraries, files)
-      @coffeeCompileLibraryFiles files
+          @gruntCompileFilesInLibrary(carteroJSON, library, processedLibraries, files)
+      @gruntCompileLibraryFiles files
       return (file.src for file in files)
 
-  coffeeCompileFilesInLibrary:(carteroJSON, library, processedLibraries, files)=>
+  gruntCompileFilesInLibrary:(carteroJSON, library, processedLibraries, files)=>
     if !_.contains(processedLibraries, library.id)
       processedLibraries.push library.id
       for file in library.files when file.type is "LOCAL"
-        if fileExtension(file.path) is "coffee"
+        if fileExtension(file.path) is @fileExt
           dest = @renameDestinationFile(file.path)
           files.push src:file.path, dest:dest
           relativeLibPath = path.relative path.resolve(@options.librariesDestinationPath, "library-assets", library.id), file.path
@@ -57,41 +62,42 @@ class CoffeeAssetsProcessor extends AssetsProcessor
           file.path = dest
       for otherLibId in library.dependencies
         otherLib = carteroJSON.libraries[otherLibId]
-        @coffeeCompileFilesInLibrary(carteroJSON, otherLib, processedLibraries, files)
+        @gruntCompileFilesInLibrary(carteroJSON, otherLib, processedLibraries, files)
 
-  coffeeCompileLibraryFiles:(files)=>
-    @grunt.config( [ "coffee", "project_cartero_coffee_library_files" ], {files: files} )
-    @grunt.task.run "coffee:project_cartero_coffee_library_files"
-    @logger.debug "created coffee grunt job with options #{JSON.stringify({files: files}, null, 2)}"
+  gruntCompileLibraryFiles:(files)=>
+    @grunt.config( [ @task, "project_cartero_#{@task}_library_files" ], {files: files} )
+    @grunt.task.run "#{@task}:project_cartero_#{@task}_library_files"
+    @logger.debug "created #{@task} grunt job with options #{JSON.stringify({files: files}, null, 2)}"
 
 
-  coffeeCompileViewsAssets:(carteroJSON)=>
+  gruntCompileViewsAssets:(carteroJSON)=>
     Q.fcall ()=>
       processedLibraries = []
       files = []
       for templateId, template of carteroJSON.templates
         if template.ownFiles?
-          @coffeeCompileViewFilesInLibrary(carteroJSON, template.ownFiles, processedLibraries, files)
-      @coffeeCompileViewsFiles files
+          @gruntCompileViewFilesInLibrary(carteroJSON, template.ownFiles, processedLibraries, files)
+      @gruntCompileViewsFiles files
       return (file.src for file in files)
 
-  coffeeCompileViewFilesInLibrary:(carteroJSON, library, processedLibraries, files)->
+  gruntCompileViewFilesInLibrary:(carteroJSON, library, processedLibraries, files)->
     if !_.contains(processedLibraries, library.id)
       processedLibraries.push library.id
       for file in library.files when file.type is "LOCAL"
-        if fileExtension(file.path) is "coffee"
+        if fileExtension(file.path) is @fileExt
           dest = @renameDestinationFile(file.path)
           files.push src:file.path, dest:dest
           file.path = dest
 
-  coffeeCompileViewsFiles:(files)=>
-    @grunt.config( [ "coffee", "project_cartero_coffee_views_files" ], {files: files} )
-    @grunt.task.run "coffee:project_cartero_coffee_views_files"
-    @logger.debug "created coffee grunt job with options #{JSON.stringify({files: files}, null, 2)}"
+  gruntCompileViewsFiles:(files)=>
+    @grunt.config( [ @task, "project_cartero_#{@task}_views_files" ], {files: files} )
+    @grunt.task.run "#{@task}:project_cartero_#{@task}_views_files"
+    @logger.debug "created #{@task} grunt job with options #{JSON.stringify({files: files}, null, 2)}"
 
 
   deleteSrcFiles:(files)=>
-    @grunt.config( [ "clean", "project_cartero_clean_coffee_files" ], files )
-    @grunt.task.run "clean:project_cartero_clean_coffee_files"
+    if !@clean then return
+    @grunt.config( [ "clean", "project_cartero_clean_#{@task}_files" ], files )
+    @grunt.task.run "clean:project_cartero_clean_#{@task}_files"
     @logger.debug "created clean grunt job with options #{JSON.stringify(files, null, 2)}"
-module.exports = CoffeeAssetsProcessor
+module.exports = GruntAssetsProcessor

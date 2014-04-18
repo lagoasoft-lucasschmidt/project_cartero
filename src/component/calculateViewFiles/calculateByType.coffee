@@ -3,20 +3,14 @@ path = require( "path" )
 
 module.exports = (opts)->
   web = opts?.web
-  fileType = opts?.fileType or throw new Error("File Type must be informed")
-  extension = opts?.fileExtension or throw new Error("File Extension must be informed")
-  carteroJSON = opts.carteroJSON or throw new Error("CarteroJSON must be informed")
+  filterFile = opts?.filterFile
+  filterLibrary = opts?.filterLibrary or ()-> return true
+  carteroJSON = opts?.carteroJSON or throw new Error("CarteroJSON must be informed")
+  runFindFiles = require('./findFiles')({web:web, carteroJSON: carteroJSON, filterFile: filterFile})
 
-  runFindFiles = require('./findFiles')({web:web, carteroJSON: carteroJSON, fileExtension: extension, fileType:fileType})
+  findFiles = (files, library)-> return runFindFiles(files, library)
 
-  fileExtension = (filename)->
-    calculatedExt = path.extname(filename || '').split('.')
-    return calculatedExt[calculatedExt.length - 1]
-
-
-  findFiles = (files, excludeFiles, libraryId)-> return runFindFiles(files, excludeFiles, libraryId)
-
-  findLibraryFiles = (library)-> return findFiles(library.files, library.bundleJSON.dynamicallyLoadedFiles, library.id)
+  findLibraryFiles = (library)-> return findFiles(library.files, library)
 
   calculateLibraryFiles = (library)->
     localFiles = []
@@ -26,7 +20,7 @@ module.exports = (opts)->
         otherLib = carteroJSON.libraries[dep]
         localFiles = localFiles.concat calculateLibraryFiles(otherLib)
 
-    if library.files?
+    if library.files? and filterLibrary(library)
       localFiles = localFiles.concat findLibraryFiles(library)
 
     return _.uniq(localFiles)

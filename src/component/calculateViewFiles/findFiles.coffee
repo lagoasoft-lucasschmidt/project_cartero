@@ -5,25 +5,32 @@ fileExtension = require '../utils/fileExtension'
 
 module.exports = (opts)->
   web = opts?.web
-  fileType = opts?.fileType or throw new Error("File Type must be informed")
-  extension = opts?.fileExtension or throw new Error("File Extension must be informed")
   carteroJSON = opts.carteroJSON or throw new Error("CarteroJSON must be informed")
+  filterFile = opts.filterFile or ()-> return true
 
-  convertPath = (filePath)->
-    if web and fileType is "LOCAL"
-      return path.join (carteroJSON.options.contextPath or "/"), path.relative(carteroJSON.options.publicFilesPath, filePath)
-    else return filePath
+  convertWebPath = (filePath)->
+    return path.join (carteroJSON.options.contextPath or "/"), path.relative(carteroJSON.options.publicFilesPath, filePath)
 
-  return findFiles = (files, excludeFiles, libraryId)->
-    excludeFiles = excludeFiles or []
+  return findFiles = (files, library)->
+    excludeFiles = library?.bundleJSON.dynamicallyLoadedFiles or []
+    libraryId = library?.id
 
-    localFiles = (file.path for file in files when file.type is fileType and fileExtension(file.path) is extension)
+    allFiles = []
+    localFiles = []
+    for file in files when filterFile(file.path, fileExtension(file), file, library)
+      allFiles.push file.path
+      localFiles.push file.path if file.type is "LOCAL"
 
     if excludeFiles?.length and libraryId?
-      localFiles = _.filter localFiles, (localFile)->
+      excludedLocalFiles = _.filter localFiles, (localFile)->
         relativeToLibrary = path.resolve carteroJSON.options.librariesDestinationPath, "library-assets", libraryId
         relativeToLibrary = path.relative relativeToLibrary, localFile
-        return !_.contains(excludeFiles, relativeToLibrary)
-    localFiles = _.map localFiles, convertPath
+        return _.contains(excludeFiles, relativeToLibrary)
+      allFiles = _.filter allFiles, (filePath)-> return !_.contains(excludedLocalFiles, filePath)
 
-    return _.uniq((localFiles))
+    # convert only localFiles to web, if this is for web
+    allFiles = _.map allFiles, (filePath)->
+      if _.contains(localFiles, filePath) and web then return convertWebPath(filePath)
+      return filePath
+
+    return _.uniq((allFiles))

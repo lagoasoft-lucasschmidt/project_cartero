@@ -49,8 +49,6 @@ class MoveAssetsProcessor extends AssetsProcessor
   copyLibraryFiles:(files)=>
     copyOptions =
       files: files
-      # process: (content, filePath)->
-      #   mkdirp.sync path.join(filePath, "..")
     @grunt.config( [ "copy", "project_cartero_move_library_files" ], copyOptions )
     @grunt.task.run "copy:project_cartero_move_library_files"
     @logger.debug "created copy grunt job with options #{JSON.stringify(copyOptions, null, 2)}"

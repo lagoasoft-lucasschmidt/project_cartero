@@ -56,16 +56,16 @@ class DefaultTemplatesDescriptorBuilder extends TemplatesDescriptorBuilder
     @debug "Will build template descriptors"
     Q.nfcall(@scanner.scanTemplates)
     .then (scannedTemplates)=>
-      @trace "Created scannedTemplates, now, will build real templates descriptions"
+      @debug "Created scannedTemplates, now, will build real templates descriptions"
       @scannedTemplatesMap[scannedTemplate.filePath] = scannedTemplate for scannedTemplate in scannedTemplates
       @debug "ScannedTemplates #{_.keys(@scannedTemplatesMap).length}=#{JSON.stringify(_.keys(@scannedTemplatesMap), null, 2)}"
       promises = (@internalBuildTemplateDescriptor(scannedTemplate) for scannedTemplate in scannedTemplates)
       Q.all(promises)
     .then (result)=>
       templatesNames = _.map result, (tmpl)-> return tmpl.filePath
-      @debug "Finished calculating all Template descriptors=#{result.length}=#{JSON.stringify(templatesNames, null, 2)}"
+      @info "Finished calculating all Template descriptors=#{result.length}=#{JSON.stringify(templatesNames, null, 2)}"
       librariesNames = _.sortBy(_.keys(@libraries.getCalculatedLibraries()))
-      @debug "All Libraries generated during this were #{librariesNames.length}=#{JSON.stringify(librariesNames, null, 2)}"
+      @info "All Libraries generated during this were #{librariesNames.length}=#{JSON.stringify(librariesNames, null, 2)}"
       callback(null, {templates:result, libraries: @libraries.getCalculatedLibraries()})
     .fail (error)=>
       @error msg:"Error while trying to build template descriptors", error: error

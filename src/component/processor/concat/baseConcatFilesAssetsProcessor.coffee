@@ -38,7 +38,14 @@ class BaseConcatFilesAssetsProcessor extends AssetsProcessor
       return files
 
   concatFilesInTemplate:(carteroJSON, template, files)=>
-    opts = {carteroJSON:carteroJSON, web: false, fileType: "LOCAL", fileExtension:@resultExtension}
+    opts =
+      carteroJSON:carteroJSON
+      web: false
+      filterLibrary: (library)->
+        library.bundleJSON.keepSeparate is false
+      filterFile: (path, ext, fileObj)=>
+        return @resultExtension is ext and fileObj.type is "LOCAL"
+
     filesToConcat = calculateViewFilesByType(opts)(template)
 
     if filesToConcat.length > 0
@@ -49,13 +56,6 @@ class BaseConcatFilesAssetsProcessor extends AssetsProcessor
     concatFileName = path.basename(template.filePath) + '-' + Date.now() + "." + @resultExtension
     newPath = path.join @options.librariesDestinationPath, "views-assets", path.relative(@options.templatesPath, template.filePath)
     return path.resolve newPath, "..", concatFileName
-
-  addFilesToConcatFromLibrary:(library, filesToConcat)=>
-    libraryPath = @calculateLibraryPath(library.id)
-    for file in library.files when file.type is "LOCAL"
-      isDynamic = _.contains(library.bundleJSON.dynamicallyLoadedFiles, path.relative(libraryPath, file.path))
-      if (fileExtension(file.path) in @extensions) and !isDynamic
-        filesToConcat.push file.path
 
   concatTemplatesFiles:(files)=>
     concatOptions =

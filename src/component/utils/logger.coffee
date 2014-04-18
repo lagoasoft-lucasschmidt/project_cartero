@@ -32,7 +32,7 @@ class LoggableObject
       tags = ''
       tags = meta.tags.toString() if meta?.tags?
       console.log "#{meta?.pid} - #{meta?.user?.email or 'anon'} #{tags['tags']}
-      #{moment().format("MMMM Do YYYY, h:mm:ss a").date} - #{level[level]} - #{message[level]}"
+      #{moment().format("MMMM Do YYYY, h:mm:ss:SSS a").date} - #{level[level]} - #{message[level]}"
       callback()
 
   constructor: (@tags, opts={}) ->
