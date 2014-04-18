@@ -3,6 +3,7 @@ path = require( "path" )
 fs = require 'fs'
 
 calculateViewMetadata = require './calculateViewMetadata'
+fileExtension = require '../component/utils/fileExtension'
 
 module.exports = (carteroFilePath)->
   try
@@ -18,6 +19,9 @@ module.exports = (carteroFilePath)->
       _arguments = arguments
 
       absolutePath = path.resolve req.app.get( "views" ), name
+
+      if req.app.get("view engine")? and fileExtension(absolutePath) isnt req.app.get("view engine")
+        absolutePath =  "#{absolutePath}.#{req.app.get("view engine")}"
 
       viewMetadata = null
       if viewsCache[absolutePath]? then viewMetadata = viewsCache[absolutePath]
