@@ -1,5 +1,5 @@
 # Project Cartero
-> Project Cartero is a tool that runs on [Grunt.js](http://gruntjs.com/), based on [Cartero v1](https://github.com/rotundasoftware/cartero/tree/cartero-1), that provides a way to manage your client-side code. No direct support for browserify (like Cartero v1), if you wish that, please see [Cartero v2](https://github.com/rotundasoftware/cartero).
+> Project Cartero is a tool that runs on [Grunt.js](http://gruntjs.com/), based on [Cartero v1](https://github.com/rotundasoftware/cartero/tree/cartero-1), that provides a way to manage your client-side code in web projects (Node ...). No direct support for browserify (like Cartero v1), if you wish that, please see [Cartero v2](https://github.com/rotundasoftware/cartero).
 
 > The theory is that you have a bunch of views (normally template based) and you have client-side code (css/js/coffee...) for that view, and you have a set of libraries that your view may depend on.
 
@@ -249,87 +249,17 @@ app.listen 3000, ()-> console.log "Started app!!"
 
 ```
 
-## How does it work internally
-
-We have a primary Grunt task that loads all other tasks.
-
-### 1. Tasks
-
-The first task (project_cartero_create_description) is used to describe the view/libraries. It creates an instance of *TemplatesDescriptorBuilder* and writes the results (templates and libraries), with *CarteroFileDescriptorBuilder*. **You can modify the behavior of any component of this step by using the internal options described in the last section.**)
-
-The last task (project_cartero_assets_processor) is recursive. The objective here is to execute all assets processors in order. This means that when this task is executed, it receives an index to know which processor it should load based on the *assetsProcessor* array. When the current processor finishes, it creates another task grunt by moving the index.
-
-### 2. Model
-
-Its used a few classes to describe Libraries, Templates and Files.
-
-A *Library* can have:
-
-- id (its the relative path of the libraries dir, eg: app/timekeeper)
-- bundleJSON (an object describing  the library based on the default bundleJSON options)
-- dependencies (an array of library ids)
-- files (array of *LibraryFile*)
-
-A *LibraryFile* can have:
-
-- path (its the full path to the file, or a remote file url)
-- type (REMOTE or LOCAL)
-
-A *ScannedTemplate* can have:
-
-- filePath (full path to the template file)
-- extend (full path of the template it extends)
-- includes (array of full paths of templates it includes)
-- libraryDependencies (array of library ids)
-- ownFiles (array of file paths)
-
-A *Template* can have:
-
-- filePath (full path to the template file)
-- extend (full path of the template it extends)
-- includes (array of full paths of templates it includes)
-- libraryDependencies (array of library ids)
-- ownFiles (instance of LibraryFile)
-
-**these two template definitions could probably be merged into one: overdesign**
-
-
-
-## Grunt Options / Internal Options
-
-You could in theory override all components of this library, if you want to. Lets say you do not like how something is done. One way is for you to provide a fix, but sometimes, you want to change behavior. For that, you can implement your own component and set the appropriate option.
-
-**See /src/model for more information in the "Contract" of each component**
-
-```
-
-  libraryCreators: require('project-cartero/lib/component/libraryCreator/defaultLibraryCreator')
-  	# you can define many LibraryCreators that will be used by DefaultLibrariesDescriptorBuilder.
-  	# must be class that extends LibraryCreator
-  	# you will implement a method saying that you can create a library, and another one that creates the library
-  	# this way, you could do some fancy stuff, like downloading external files, executing external tasks
-
-  templateOwnFilesLibraryCreator: require('project-cartero/lib/component/libraryCreator/defaultTemplateOwnFilesLibraryCreator')
-  	# This component is responsible to create a Library based on a template filePath.
-  	# it must be a class that extends LibraryCreator
-  	# Will read the folders
-
-  scannedTemplatesDescriptorBuilder: require('project-cartero/lib/component/builder/defaultScannedTemplatesDescriptorBuilder')
-  	# this is responsible for the creation of the ScannedTemplate definitions.
-  	# will read the template file contents, and find out if the cartero definitions are used, or, in case of Jade, if it can find any extends/includes definitions.
-  	# must be an instance of ScannedTemplatesDescriptorBuilder
-
-  librariesDescriptorBuilder: require('project-cartero/lib/component/builder/defaultLibrariesDescriptorBuilder')
-  	# responsible to find/create all Library definitions. In theory you should never modify this, but modify libraryCreators. You can add multiple libraryCreators to deal with different kind of libraries if you wish to add support for external tools like bower or something else.
-  	# must be class that extends LibrariesDescriptorBuilder
-
-
-
-```
-
 ## TODOs:
 
 - Always Improve Docs
 - Always Refactor, remove complexity
 - Create tests
 - Create environment support (bundle.json set up by environment)
+
+## Contributing
+
+The code is written in coffe-script, so, use **grunt clean coffee** to generate code. Please write tests if you add a new feature.
+
+
+## Release History
+Not ready yet.
