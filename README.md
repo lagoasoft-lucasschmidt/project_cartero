@@ -1,4 +1,4 @@
-# Project Cartero
+# Project Cartero (in development phase)
 > Project Cartero is a tool that runs on [Grunt.js](http://gruntjs.com/), based on [Cartero v1](https://github.com/rotundasoftware/cartero/tree/cartero-1), that provides a way to manage your client-side code in web projects (Node ...). No direct support for browserify (like Cartero v1), if you wish that, please see [Cartero v2](https://github.com/rotundasoftware/cartero).
 
 > The theory is that you have a bunch of views (normally template based) and you have client-side code (css/js/coffee...) for that view, and you have a set of libraries that your view may depend on.
@@ -132,9 +132,12 @@ Be aware, here, we process *css* files to replace relative URLs referenced, so i
 
 ## TODOs:
 
+- Always pre-calculate each template asset files in cartero.json, instead of doing in express-hook
+- Separate Base Code from Grunt related Code
+- Study / Add support for Gulp
+- Create tests
 - Always Improve Docs
 - Always Refactor, remove complexity
-- Create tests
 - Create environment support (bundle.json set up by environment)
 
 ## Contributing
