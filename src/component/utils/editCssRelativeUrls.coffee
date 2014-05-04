@@ -1,8 +1,11 @@
 fs = require 'fs'
-Q = require 'q'
+Promise = require 'bluebird'
 path = require 'path'
 _s = require 'underscore.string'
 logger = require('./logger').create("UTIL")
+readFile = Promise.promisify(fs.readFile, fs)
+writeFile = Promise.promisify(fs.writeFile, fs)
+
 
 # This will be used when we move a css file to the new public dir
 # The issue is that, when we minify css, the image files will have to remain in the library dirs, otherwise, things will break
@@ -37,6 +40,11 @@ module.exports = (currentCssFilePath, newCssFilePath, options)->
     if _s.startsWith(cssContentUrl, "http://") or _s.startsWith(cssContentUrl, "https://") or _s.startsWith(cssContentUrl, "data:")
       return match
 
+    # handle hash
+    removedHashParams = ""
+    if _s.include cssContentUrl, "#"
+      removedHashParams = "#" + _s.strRight(cssContentUrl, "#")
+      cssContentUrl = _s.strLeft(cssContentUrl, "#")
     # handle query params
     removedQueryParams = ""
     if _s.include cssContentUrl, "?"
@@ -47,7 +55,7 @@ module.exports = (currentCssFilePath, newCssFilePath, options)->
     logger.debug "Resolved #{cssContentFilePath} for #{cssContentUrl}"
     if fs.existsSync cssContentFilePath
       newFullPath = path.resolve newCssFilePath, "..", cssContentUrl
-      newPath = path.relative(publicFilesPath, newFullPath) + removedQueryParams
+      newPath = path.relative(publicFilesPath, newFullPath) + removedHashParams + removedQueryParams
       if _s.startsWith(match, "url(\"") then return 'url("'+ contextPath + "/" + newPath
       else if _s.startsWith(match, "url('") then return 'url(\''+ contextPath + "/" + newPath
       else return 'url('+ contextPath + "/" + newPath
@@ -55,10 +63,10 @@ module.exports = (currentCssFilePath, newCssFilePath, options)->
     else
       logger.warn "Couldnt find file #{cssContentFilePath} into dirs, ignoring css url=#{url.trim()}"
       return match
-  Q.nfcall(fs.readFile, currentCssFilePath)
+  readFile(currentCssFilePath)
   .then (data)->
     logger.debug "Trying to handle #{currentCssFilePath}, to new path #{newCssFilePath}"
     fileContents = data.toString().replace regex, replaceContents
-    Q.nfcall fs.writeFile, currentCssFilePath, fileContents
+    writeFile currentCssFilePath, fileContents
   .then ()->
     logger.debug "Successfully handled #{currentCssFilePath}, to new path #{newCssFilePath}"

@@ -1,7 +1,7 @@
 _ = require 'lodash'
 fs = require 'fs'
 path = require 'path'
-Q = require 'q'
+Promise = require 'bluebird'
 
 DefaultLibraryCreator = require './defaultLibraryCreator'
 LibraryFile = require '../../model/libraryFile'
@@ -21,20 +21,20 @@ class DefaultTemplateOwnFilesLibraryCreator extends DefaultLibraryCreator
 
   internalLoadBundleJSON:(libraryId, libraryPath, libraries, options)=>
     @trace "Loading bundleJSON for library id=#{libraryId}"
-    Q.fcall ()-> _.cloneDeep(DefaultLibraryCreator.bundleDefaults)
+    Promise.resolve _.cloneDeep(DefaultLibraryCreator.bundleDefaults)
 
   internalCreateDependencies:(libraryId, libraryPath, libraries, options, bundleJSON)->
-    Q.fcall ()-> []
+    Promise.resolve []
 
   internalCreateLibraryFiles:(libraryId, libraryPath, libraries, options, bundleJSON)->
     ownFiles = options.ownFiles or []
-    Q.fcall ()-> (new LibraryFile({type: "LOCAL", path: file}) for file in ownFiles)
+    Promise.resolve (new LibraryFile({type: "LOCAL", path: file}) for file in ownFiles)
 
   internalCreateLibraryRemoteFiles:(libraryId, libraryPath, libraries, options, bundleJSON)->
-    Q.fcall ()=> []
+    Promise.resolve []
 
   internalCreateSubLibraries:(libraryId, libraryPath, libraries, options, bundleJSON)->
-    Q.fcall ()=> []
+    Promise.resolve []
 
 
 

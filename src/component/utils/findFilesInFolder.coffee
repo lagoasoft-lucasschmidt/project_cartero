@@ -1,16 +1,17 @@
-Q = require 'q'
+Promise = require 'bluebird'
 fs = require 'fs'
 isFile = require './isFile'
 path = require 'path'
 logger = require('./logger').create("UTIL")
+readdir = Promise.promisify(fs.readdir, fs)
 
 module.exports = (folder, matches)->
   logger.trace "Trying to read files inside path #{folder}, with match condition=#{matches}"
-  Q.nfcall(fs.readdir, folder)
+  readdir(folder)
   .then (stats)->
     logger.trace "Read directory #{folder} with stats=#{stats}"
     promises = (isFile(path.join(folder, file), /\*./) for file in stats)
-    Q.all(promises)
+    Promise.all(promises)
     .then (results)->
       files = []
       for result, i in results

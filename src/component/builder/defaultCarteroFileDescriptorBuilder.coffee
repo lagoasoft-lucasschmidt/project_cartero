@@ -1,6 +1,6 @@
 _ = require 'lodash'
 path = require 'path'
-Q = require 'q'
+Promise = require 'bluebird'
 fs = require 'fs'
 mkdirp = require('mkdirp')
 saveCarteroJSON = require "../utils/saveCarteroJSON"
@@ -30,12 +30,12 @@ class DefaultCarteroFileDescriptorBuilder extends CarteroFileDescriptorBuilder
       .then ()=>
         @debug "Successfully wrote Cartero File Descritor on #{filePath}"
         callback(null, filePath)
-    .fail (error)=>
+    .catch (error)=>
       @error msg: "Error while trying to create Cartero File Descritor", error:error
       callback(new Error(error))
 
   validateTemplates:(templates=[])=>
-    Q.fcall ()=>
+    Promise.resolve().then ()=>
       for template in templates
         throw new Error("Template must be instanceof ScannedTemplate") if !(template instanceof ScannedTemplate)
 module.exports = DefaultCarteroFileDescriptorBuilder

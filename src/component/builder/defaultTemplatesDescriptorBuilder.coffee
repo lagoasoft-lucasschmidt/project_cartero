@@ -1,5 +1,5 @@
 _ = require 'lodash'
-Q = require 'q'
+Promise = require 'bluebird'
 fs = require 'fs'
 path = require 'path'
 
@@ -26,7 +26,8 @@ class DefaultTemplatesDescriptorBuilder extends TemplatesDescriptorBuilder
 
   buildTemplatesDescriptors:(callback)=>
     @debug "Will build template descriptors"
-    Q.nfcall(@scanner.scanTemplates)
+
+    Promise.promisify(@scanner.scanTemplates)()
     .then (scannedTemplates)=>
       @info "ScannedTemplates=#{JSON.stringify(scannedTemplates, null, 2)}"
       return scannedTemplates
@@ -36,10 +37,9 @@ class DefaultTemplatesDescriptorBuilder extends TemplatesDescriptorBuilder
       librariesNames = _.sortBy(_.keys(@scanner.getCalculatedLibraries()))
       @info "All Libraries generated during this were #{librariesNames.length}=#{JSON.stringify(librariesNames, null, 2)}"
       callback(null, {templates:result, libraries: @scanner.getCalculatedLibraries()})
-    .fail (error)=>
+    .error (error)=>
       @error msg:"Error while trying to build template descriptors", error: error
       callback(error)
-    .done()
 
 
 module.exports = DefaultTemplatesDescriptorBuilder

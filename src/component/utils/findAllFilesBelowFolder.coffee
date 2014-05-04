@@ -1,11 +1,11 @@
-Q = require 'q'
+Promise = require 'bluebird'
 cordell = require 'cordell'
 logger = require('./logger').create("UTIL")
 
 
 module.exports = (folder, matches)->
   logger.trace "Trying to read all files recursively with path #{folder}, with match condition=#{matches}"
-  deferred = Q.defer()
+  deferred = Promise.defer()
   walker = cordell.walk folder, {match: matches }
   walker.on "error", (path, error)->
     logger.error msg: "Error while trying to scan all files inside path=#{folder}", error: error

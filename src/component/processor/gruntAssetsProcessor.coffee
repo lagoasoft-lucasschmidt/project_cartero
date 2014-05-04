@@ -1,5 +1,5 @@
 _ = require 'lodash'
-Q = require 'q'
+Promise = require 'bluebird'
 fs = require 'fs'
 path = require 'path'
 fileExtension = require '../utils/fileExtension'
@@ -18,17 +18,17 @@ class GruntAssetsProcessor extends AssetsProcessor
 
 
   run:(carteroJSON, callback)=>
-    Q(null).then ()=>
+    Promise.resolve().then ()=>
       promises = []
       promises.push @gruntCompileLibraryAssets(carteroJSON)
       promises.push @gruntCompileViewsAssets(carteroJSON)
-      Q.all(promises)
+      Promise.all(promises)
     .spread (filesToDelete, otherFilesToDelete)=>
       filesToDelete = filesToDelete.concat otherFilesToDelete
       @deleteSrcFiles filesToDelete
       @debug msg: "Successfully runned GruntAssetsProcessor"
       callback(null, carteroJSON)
-    .fail (error)=>
+    .error (error)=>
       @error msg:"rror while trying to run GruntAssetsProcessor", error: error
       callback(new Error(error))
 
@@ -38,7 +38,7 @@ class GruntAssetsProcessor extends AssetsProcessor
     return path.resolve newPath, path.basename(filePath, ".#{@fileExt}")+".#{@destExt}"
 
   gruntCompileLibraryAssets:(carteroJSON)=>
-    Q.fcall ()=>
+    Promise.resolve().then ()=>
       processedLibraries = []
       files = []
       for templateId, template of carteroJSON.templates
@@ -71,7 +71,7 @@ class GruntAssetsProcessor extends AssetsProcessor
 
 
   gruntCompileViewsAssets:(carteroJSON)=>
-    Q.fcall ()=>
+    Promise.resolve().then ()=>
       processedLibraries = []
       files = []
       for templateId, template of carteroJSON.templates

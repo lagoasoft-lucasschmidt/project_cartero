@@ -1,5 +1,5 @@
 _ = require 'lodash'
-Q = require 'q'
+Promise = require 'bluebird'
 path = require 'path'
 fs = require 'fs'
 readCarteroJSON = require "../component/utils/readCarteroJSON"
@@ -37,7 +37,7 @@ module.exports = (grunt)->
 
     readCarteroJSON(options)
     .then (carteroJSON)->
-      Q.nfcall(processor.run, carteroJSON)
+      Promise.promisify(processor.run, processor)(carteroJSON)
     .then (carteroJSON)->
       saveCarteroJSON(carteroJSON, options)
     .then ()->
@@ -46,7 +46,7 @@ module.exports = (grunt)->
         grunt.config ["project_cartero_assets_processor", "index#{options.assetsProcessorsIndex}", "options"], options
         grunt.task.run "project_cartero_assets_processor:index#{options.assetsProcessorsIndex}"
       done()
-    .fail (error)->
+    .error (error)->
       grunt.log.error error.stack or error
       grunt.log.error "Error while trying to execute project_cartero_move_process"
       done(error)

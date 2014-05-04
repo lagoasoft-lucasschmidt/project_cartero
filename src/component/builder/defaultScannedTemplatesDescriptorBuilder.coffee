@@ -1,10 +1,11 @@
 _ = require 'lodash'
 _s = require 'underscore.string'
-Q = require 'q'
+Promise = require 'bluebird'
 fs = require 'fs'
 path = require 'path'
 findAllFilesBelowFolder = require '../utils/findAllFilesBelowFolder'
 findFilesInFolder = require '../utils/findFilesInFolder'
+readFile = Promise.promisify(fs.readFile)
 
 LibraryCreator = require '../../model/libraryCreator'
 Library = require '../../model/library'
@@ -57,19 +58,19 @@ class DefaultScannedTemplatesDescriptorBuilder extends ScannedTemplatesDescripto
     findAllFilesBelowFolder(@options.templatesPath, @options.templatesExtensions)
     .then (files)=>
       promises = (@internalScanTemplate(file) for file in files)
-      Q.all promises
+      Promise.all promises
     .then (scannedTemplates)-> callback(null, scannedTemplates)
-    .fail (error)=>
+    .error (error)=>
       @error msg: "Error while trying to scan templates", error: error
       callback(new Error(error))
 
   internalScanTemplate:(file)=>
-    if @templatesCache[file]? then return Q.fcall ()=>
+    if @templatesCache[file]?
       @debug "Found template #{file} already cached"
-      return @templatesCache[file]
+      return Promise.resolve @templatesCache[file]
 
     @trace "Found template #{file}, will process it"
-    Q.nfcall(fs.readFile, file, "utf-8")
+    readFile(file, 'utf-8')
     .then (data)=>
       fileContents = data.toString()
       promises = []
@@ -77,20 +78,20 @@ class DefaultScannedTemplatesDescriptorBuilder extends ScannedTemplatesDescripto
       promises.push @internalFindIncludedTemplates(file, fileContents)
       promises.push @internalFindLibraryDependencies(file, fileContents)
       promises.push @internalFindOwnFiles(file, fileContents)
-      Q.all promises
+      Promise.all promises
       .spread (extend, includes, libraryDependencies, ownFiles)=>
-        return new ScannedTemplate
+        template = new ScannedTemplate
           filePath: file
           extend: extend
           includes: includes
           libraryDependencies: libraryDependencies
           ownFiles: ownFiles
-    .then (template)=>
-      @templatesCache[file] = template
-      return template
+        @templatesCache[file] = template
+        return template
+
 
   internalFindExtendsDependency:(filePath, fileContents)=>
-    Q.fcall ()=>
+    Promise.resolve().then ()=>
       carteroExtendsMatches = carteroExtendsRegExp.exec(fileContents)
       if !_.isNull(carteroExtendsMatches)
         return path.join @options.templatesPath, carteroExtendsMatches[1]
@@ -112,7 +113,7 @@ class DefaultScannedTemplatesDescriptorBuilder extends ScannedTemplatesDescripto
       @internalScanTemplate(extend).then ()-> return extend
 
   internalFindIncludedTemplates:(filePath, fileContents)=>
-    Q.fcall ()=>
+    Promise.resolve().then ()=>
       myRegex = /include\s.*/g;
       matches = []
       while ((partialMatches = myRegex.exec(fileContents)) != null)
@@ -126,11 +127,11 @@ class DefaultScannedTemplatesDescriptorBuilder extends ScannedTemplatesDescripto
     .then (deps)=>
       # scan each included dep, but return only the filepaths
       if not deps?.length then return []
-      promises = @internalScanTemplate(dep) for dep in deps
-      Q.all(promises).then ()-> return deps
+      promises = (@internalScanTemplate(dep) for dep in deps)
+      Promise.all(promises).then ()-> return deps
 
   internalFindLibraryDependencies:(filePath, fileContents)=>
-    Q.fcall ()=>
+    Promise.resolve().then ()=>
       libraryDependencies = []
       carteroRequiresMatches = carteroRequiresRegExp.exec(fileContents)
       if _.isNull(carteroRequiresMatches) then return libraryDependencies
@@ -144,12 +145,12 @@ class DefaultScannedTemplatesDescriptorBuilder extends ScannedTemplatesDescripto
     .then (libraryDependencies)=>
       # scan libraries, but return only names
       promises = (@libraries.getLibrary(lib) for lib in libraryDependencies)
-      Q.all(promises).then ()-> return libraryDependencies
+      Promise.all(promises).then ()-> return libraryDependencies
 
   internalFindOwnFiles:(filePath, fileContents)=>
     findFilesInFolder(path.join(filePath, ".."), @options.templatesOwnFilesExtensions)
       .then (filePaths)=>
-        deferred = Q.defer()
+        deferred = Promise.defer()
         createOpts = _.defaults {ownFiles: filePaths or []}, @options
         @templateOwnFilesLibraryCreator.createLibrary filePath, @libraries, createOpts, (error, newLibrary)->
           if error then return deferred.reject(new Error(error))

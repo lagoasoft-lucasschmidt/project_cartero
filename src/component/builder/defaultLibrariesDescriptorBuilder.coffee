@@ -1,6 +1,6 @@
 _ = require 'lodash'
 path = require 'path'
-Q = require 'q'
+Promise = require 'bluebird'
 
 LibrariesDescriptorBuilder = require '../../model/librariesDescriptorBuilder'
 Library = require '../../model/library'
@@ -45,7 +45,7 @@ class DefaultLibrariesDescriptorBuilder extends LibrariesDescriptorBuilder
       return null
 
   internalCreateLibrary:(libraryId)=>
-    Q.fcall ()=>
+    Promise.resolve().then ()=>
       throw new Error("LibraryId must be informed") if !_.isString(libraryId)
       @trace "Trying to create library id=#{libraryId}, will attempt to choose libraryCreator"
       @internalChooseLibraryCreator(libraryId)
@@ -56,14 +56,14 @@ class DefaultLibrariesDescriptorBuilder extends LibrariesDescriptorBuilder
       if not library then throw new Error("LibraryCreator couldnt create library id=#{libraryId}, no errors were given, this shoudnt happen")
       @_allLibraries[libraryId] = library
       return library
-    .fail (error)=>
+    .error (error)=>
       @trace msg:"Error while trying to create library id=#{libraryId}", error: error
       return null
 
   internalChooseLibraryCreator:(libraryId)=>
     @trace "Trying to choose library creator for library id=#{libraryId}"
     promises = (@internalCanLibraryCreatorCreateLibrary(libraryId, creator) for creator in @libraryCreators)
-    Q.all(promises)
+    Promise.all(promises)
     .then (answers)=>
       for answer, i in answers
         if answer is true
@@ -74,26 +74,26 @@ class DefaultLibrariesDescriptorBuilder extends LibrariesDescriptorBuilder
       return null
 
   internalCreateLibraryByLibraryCreator:(libraryId, creator)=>
-    deferred = Q.defer()
+    deferred = Promise.defer()
     creator.createLibrary libraryId, @, @options, (error, newLibrary)=>
       if error then return deferred.reject(new Error(error))
       else return deferred.resolve(newLibrary)
     deferred.promise
 
   internalCanLibraryCreatorCreateLibrary:(libraryId, creator)=>
-    deferred = Q.defer()
+    deferred = Promise.defer()
     creator.canCreateLibrary libraryId, @, @options, (error, can)=>
       if error then return deferred.reject(new Error(error))
       else return deferred.resolve(can)
     deferred.promise
 
   getLibrary:(libraryId)=>
-    Q.fcall ()=>
+    Promise.resolve().then ()=>
       throw new Error("LibraryId must be informed") if !_.isString(libraryId)
       @trace "Trying to get library id=#{libraryId}"
       if @_allLibraries[libraryId]? and  @_allLibraries[libraryId] instanceof Library
         @trace "Found library id=#{libraryId} already cached"
-        Q.fcall ()=> @_allLibraries[libraryId]
+        Promise.resolve @_allLibraries[libraryId]
       else
         @trace "Couldnt find library id=#{libraryId} into cache, will attempt to load properly"
         @internalCreateLibrary(libraryId)

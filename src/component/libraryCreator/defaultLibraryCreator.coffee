@@ -1,12 +1,13 @@
 _ = require 'lodash'
 fs = require 'fs'
 path = require 'path'
-Q = require 'q'
+Promise = require 'bluebird'
 isFolder = require '../utils/isFolder'
 fileExists = require '../utils/fileExists'
 findFilesInFolder = require '../utils/findFilesInFolder'
 findFilesInFolders = require '../utils/findFilesInFolders'
 findFoldersInFolder = require '../utils/findFoldersInFolder'
+readFile = Promise.promisify(fs.readFile, fs)
 
 LibraryCreator = require '../../model/libraryCreator'
 Library = require '../../model/library'
@@ -37,7 +38,7 @@ class DefaultLibraryCreator extends LibraryCreator
     .then (isFolder)=>
       @trace "Can libraryId=#{libraryId} be handled by #{@name}=#{isFolder}"
       callback(null, isFolder)
-    .fail (error)->
+    .error (error)->
       callback(null, false)
 
   createLibrary:(libraryId, libraries, options, callback)=>
@@ -50,7 +51,7 @@ class DefaultLibraryCreator extends LibraryCreator
       promises.push @internalCreateLibraryFiles(libraryId, libraryPath, libraries, options, bundleJSON)
       promises.push @internalCreateLibraryRemoteFiles(libraryId, libraryPath, libraries, options, bundleJSON)
       promises.push @internalCreateSubLibraries(libraryId, libraryPath, libraries, options, bundleJSON)
-      Q.all(promises)
+      Promise.all(promises)
       .spread (dependencies, libraryFiles, libraryRemoteFiles, subLibraries)=>
         @trace "Correctly calculated everything for library id=#{libraryId}"
         return new Library
@@ -62,10 +63,9 @@ class DefaultLibraryCreator extends LibraryCreator
     .then (library)=>
       @trace "Sucessfully created library #{libraryId}"
       callback(null, library)
-    .fail (error)=>
+    .error (error)=>
       @error msg:"Error while trying to create library id=#{libraryId}", error: error
       callback(new Error(error))
-    .done()
 
   internalCreateLibraryPath:(libraryId, libraries, options)-> path.join(options.librariesPath, libraryId)
 
@@ -77,12 +77,12 @@ class DefaultLibraryCreator extends LibraryCreator
       @trace "Does bundleJSON  exists for library id=#{libraryId}=#{exists}"
       if not exists then return {}
       else
-        Q.nfcall(fs.readFile, bundleJSONPath, "utf-8")
+        readFile(bundleJSONPath, "utf-8")
         .then (fileContents)=>
           @trace "Read bundleJSON for library id=#{libraryId}"
           jsonString = fileContents.toString()
           return JSON.parse(jsonString)
-        .fail (error)=>
+        .error (error)=>
           @trace error.stack or error
           @trace "Error while trying to read bundle.json of library id=#{libraryId}"
           return {}
@@ -98,7 +98,7 @@ class DefaultLibraryCreator extends LibraryCreator
       return []
     else
       promises = (libraries.getLibrary(dependency) for dependency in dependencies)
-      Q.all(promises).then (results)=>
+      Promise.all(promises).then (results)=>
         @trace "Correctly created dependencies for library id=#{libraryId}"
         return _.map results, (result)-> result.id
 
@@ -127,8 +127,8 @@ class DefaultLibraryCreator extends LibraryCreator
     return _.map sortedRelativeFiles, (relativeFilePath)-> path.join(libraryPath, relativeFilePath)
 
   internalCreateLibraryRemoteFiles:(libraryId, libraryPath, libraries, options, bundleJSON)=>
-    @trace "Trying to create remote files for library id=#{libraryId}"
-    Q.fcall ()=>
+    Promise.resolve().then ()=>
+      @trace "Trying to create remote files for library id=#{libraryId}"
       remoteFiles = _.map bundleJSON.remoteFiles, (remotePath)-> new LibraryFile({type: "REMOTE", path: remotePath})
       @trace "Created #{remoteFiles.length} remoteFiles library id=#{libraryId}"
       return remoteFiles
@@ -141,7 +141,7 @@ class DefaultLibraryCreator extends LibraryCreator
         !_.contains(bundleJSON.directoriesToIgnore, path.relative(libraryPath, folderPath))
       promises = (libraries.getLibrary(path.relative(options.librariesPath, folder)) for folder in filteredFolders)
       @trace "Trying to create sub-libraries for library id=#{libraryId} with folders=#{folders}, #{filteredFolders}"
-      Q.all promises
+      Promise.all promises
 
 
 

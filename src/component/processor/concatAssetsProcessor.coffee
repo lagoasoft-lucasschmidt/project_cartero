@@ -2,7 +2,7 @@ _ = require 'lodash'
 ConcatJsAssetsProcessor = require './concat/concatJsAssetsProcessor'
 ConcatCssAssetsProcessor = require './concat/concatCssAssetsProcessor'
 AssetsProcessor = require '../../model/assetsProcessor'
-Q = require 'q'
+Promise = require 'bluebird'
 
 
 class ConcatAssetsProcessor extends AssetsProcessor
@@ -12,13 +12,15 @@ class ConcatAssetsProcessor extends AssetsProcessor
     @concatCssAssetsProcessor = new ConcatCssAssetsProcessor(grunt, options)
 
   run:(carteroJSON, callback)=>
-    Q.all([ Q.nfcall(@concatJsAssetsProcessor.run, carteroJSON), Q.nfcall(@concatCssAssetsProcessor.run, carteroJSON)  ])
+    runJs = Promise.promisify(@concatJsAssetsProcessor.run, @concatJsAssetsProcessor)
+    runCss = Promise.promisify(@concatCssAssetsProcessor.run, @concatCssAssetsProcessor)
+    Promise.all([ runJs(carteroJSON), runCss(carteroJSON) ])
     .spread (jsFilesCalculated, cssFilesCalculated)=>
       @rearrangeTemplates(carteroJSON, jsFilesCalculated)
       @rearrangeTemplates(carteroJSON, cssFilesCalculated)
       @debug msg: "Successfully runned #{@name}"
       callback(null, carteroJSON)
-    .fail (error)=>
+    .error (error)=>
       @error msg:"rror while trying to run #{@name}", error: error
       callback(new Error(error))
 

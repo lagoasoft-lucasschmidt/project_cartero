@@ -1,5 +1,5 @@
 _ = require 'lodash'
-Q = require 'q'
+Promise = require 'bluebird'
 fs = require 'fs'
 path = require 'path'
 fileExtension = require '../../utils/fileExtension'
@@ -21,23 +21,23 @@ class BaseConcatFilesAssetsProcessor extends AssetsProcessor
     .then (filesCalculated)=>
       @debug msg: "Successfully runned #{@name}"
       callback(null, filesCalculated)
-    .fail (error)=>
+    .error (error)=>
       @error msg:"rror while trying to run #{@name}", error: error
       callback(new Error(error))
 
   calculateLibraryPath:(libraryId)=> path.resolve(@options.librariesDestinationPath, "library-assets", libraryId)
 
   concatTemplateViewFiles:(carteroJSON)=>
-    Q.fcall ()=>
+    Promise.resolve().then ()=>
       files = {}
 
       for templateId, template of carteroJSON.templates
-        @concatFilesInTemplate(carteroJSON, template, files)
+        @findFilesInTemplate(carteroJSON, template, files)
 
       @concatTemplatesFiles (data for file, data of files)
       return files
 
-  concatFilesInTemplate:(carteroJSON, template, files)=>
+  findFilesInTemplate:(carteroJSON, template, files)=>
     opts =
       carteroJSON:carteroJSON
       web: false

@@ -1,5 +1,5 @@
 _ = require 'lodash'
-Q = require 'q'
+Promise = require 'bluebird'
 fs = require 'fs'
 path = require 'path'
 readCarteroJSON = require '../utils/readCarteroJSON'
@@ -12,21 +12,21 @@ class MoveAssetsProcessor extends AssetsProcessor
     super("MOVE_ASSETS_PROCESSOR", grunt, options)
 
   run:(carteroJSON, callback)=>
-    Q(null).then ()=>
+    Promise.resolve().then ()=>
       promises = []
       promises.push @moveLibraryAssets(carteroJSON)
       promises.push @moveViewsAssets(carteroJSON)
-      Q.all(promises)
+      Promise.all(promises)
     .then ()=>
       @debug msg: "Successfully runned MoveAssetsProcessor"
       callback(null, carteroJSON)
-    .fail (error)=>
+    .error (error)=>
       @error msg:"Error while trying to run MoveAssetsProcessor", error: error
       callback(new Error(error))
 
 
   moveLibraryAssets:(carteroJSON)=>
-    Q.fcall ()=>
+    Promise.resolve().then ()=>
       processedLibraries = []
       files = []
       for templateId, template of carteroJSON.templates
@@ -54,7 +54,7 @@ class MoveAssetsProcessor extends AssetsProcessor
     @logger.debug "created copy grunt job with options #{JSON.stringify(copyOptions, null, 2)}"
 
   moveViewsAssets:(carteroJSON)=>
-    Q.fcall ()=>
+    Promise.resolve().then ()=>
       processedLibraries = []
       files = []
       for templateId, template of carteroJSON.templates
