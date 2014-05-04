@@ -90,7 +90,7 @@ You can describe a library by using *bundle.json* file. The following options ar
   directoriesToIgnore : []
     # relative dir paths from this directory of dirs to ignore
   directoriesToFlatten: []
-  	# relative dir paths from this directory of dirs to scan as part of this own library 
+  	# relative dir paths from this directory of dirs to scan as part of this own library
   	# (instead they become their own libraries, that depend on the current)
   prioritizeFlattenedDirectories : false
   filePriority : []
@@ -112,7 +112,7 @@ This should always be the first one. This processor will move your library/asset
 
 ### 2. GruntAssetsProcessor
 
-This processor is used internally so we can transform your object descring a Grunt task, into an instance of a GruntAssetsProcessor. This processor will simply run a Grunt task, but before that, it will map correctly the new file names into cartero.json file. 
+This processor is used internally so we can transform your object descring a Grunt task, into an instance of a GruntAssetsProcessor. This processor will simply run a Grunt task, but before that, it will map correctly the new file names into cartero.json file.
 
 An example of usage would be: ```{task: "cssmin", fileExt:"css", destExt:"css"}```
 
@@ -125,7 +125,9 @@ To use this, you will define an object in the assetsProcessor array, and the fol
 
 ### 3. ConcatAssetsProcessor
 
-This processor will join all the files (css, js) required for a view. This means that it will loop through all templates, and calculate all files that can be joined. This means files from templates extended, included, own files, and library files (directly and indirectly dependencies) that are *LOCAL* and not ```keepSeparate:true```. 
+This processor will join all the files (css, js) required for a view. This means that it will loop through all templates, and calculate all files that can be joined. This means files from templates extended, included, own files, and library files (directly and indirectly dependencies) that are *LOCAL* and not ```keepSeparate:true```.
+
+Be aware, here, we process *css* files to replace relative URLs referenced, so it works after a concat. The images/fonts ... are not moved, so they stay exactly where the original library is located, except, the reference in the css will be absolute to your public directory. If you use a contextPath definition, it will be added as well.
 
 
 ## TODOs:
