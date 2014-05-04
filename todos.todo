@@ -1,3 +1,6 @@
  ☐ Create Docs
  ☐ Create Tests
  ☐ Handle when library informed doesnt exist
+ ☐ Refactor, diminish complexity
+   ✔ Remove need for ScannedTemplate x Template ... only use ScannedTemplate and thats it @done (14-05-04 14:02)
+ ☐ replace Q with bluebird for performance? better lib overall

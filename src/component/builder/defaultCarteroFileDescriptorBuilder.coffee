@@ -6,7 +6,7 @@ mkdirp = require('mkdirp')
 saveCarteroJSON = require "../utils/saveCarteroJSON"
 
 CarteroFileDescriptorBuilder = require '../../model/carteroFileDescriptorBuilder'
-Template = require '../../model/template'
+ScannedTemplate = require '../../model/scannedTemplate'
 
 class DefaultCarteroFileDescriptorBuilder extends CarteroFileDescriptorBuilder
   constructor:(options)->
@@ -37,5 +37,5 @@ class DefaultCarteroFileDescriptorBuilder extends CarteroFileDescriptorBuilder
   validateTemplates:(templates=[])=>
     Q.fcall ()=>
       for template in templates
-        throw new Error("Template must be instanceof Template") if !(template instanceof Template)
+        throw new Error("Template must be instanceof ScannedTemplate") if !(template instanceof ScannedTemplate)
 module.exports = DefaultCarteroFileDescriptorBuilder

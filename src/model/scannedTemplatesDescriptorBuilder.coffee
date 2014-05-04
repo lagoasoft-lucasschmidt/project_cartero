@@ -7,4 +7,6 @@ class ScannedTemplatesDescriptorBuilder extends LoggableObject
 
   scanTemplates:(callback)-> callback(new Error("Not Implemented"))
 
+  getCalculatedLibraries:()-> throw new Error("Not Implemented")
+
 module.exports = ScannedTemplatesDescriptorBuilder
