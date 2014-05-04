@@ -29,7 +29,7 @@ class DefaultTemplatesDescriptorBuilder extends TemplatesDescriptorBuilder
 
     Promise.promisify(@scanner.scanTemplates)()
     .then (scannedTemplates)=>
-      @info "ScannedTemplates=#{JSON.stringify(scannedTemplates, null, 2)}"
+      @debug "ScannedTemplates=#{JSON.stringify(scannedTemplates, null, 2)}"
       return scannedTemplates
     .then (result)=>
       templatesNames = _.map result, (tmpl)-> return tmpl.filePath

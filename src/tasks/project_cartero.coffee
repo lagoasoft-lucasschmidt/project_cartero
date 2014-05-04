@@ -21,6 +21,8 @@ defaultOptions =
 
   logLevel: "warn"
 
+  bowerComponentsPath: null
+
 validOptions = (grunt, options)->
   if !_.isString(options.templatesPath)
     grunt.log.error('templatesPath must be specified')

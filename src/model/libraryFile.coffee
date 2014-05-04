@@ -1,5 +1,5 @@
 _ = require 'lodash'
-availableTypes = ["LOCAL", "REMOTE"]
+availableTypes = ["LOCAL", "REMOTE", "BOWER"]
 
 class LibraryFile
   constructor:(data)->

@@ -13,16 +13,7 @@ LibraryCreator = require '../../model/libraryCreator'
 Library = require '../../model/library'
 LibraryFile = require '../../model/libraryFile'
 
-kBundleDefaults =
-  keepSeparate : false
-  dependencies : []
-  directoriesToIgnore : []
-  directoriesToFlatten: []
-  prioritizeFlattenedDirectories : false
-  filePriority : []
-  filesToIgnore : []
-  dynamicallyLoadedFiles : []
-  remoteFiles : []
+kBundleDefaults = LibraryCreator.bundleDefaults
 
 ## Responsible for Libraries that are real Folders
 class DefaultLibraryCreator extends LibraryCreator

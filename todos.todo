@@ -1,6 +1,9 @@
- ☐ Create Docs
  ☐ Create Tests
  ☐ Handle when library informed doesnt exist
  ☐ Refactor, diminish complexity
-   ✔ Remove need for ScannedTemplate x Template ... only use ScannedTemplate and thats it @done (14-05-04 14:02)
- ☐ replace Q with bluebird for performance? better lib overall
+ ☐ Separate Base Code from Grunt related Code: grunt / core / express-hook
+ ☐ Support for Bower / Npm modules: means new LibraryProcessors
+   ✔ Support for Bower @done (14-05-04 18:05)
+ ☐ Improve concat processor: you cant join all LOCAL files, if a LOCAL file depends on a REMOTE one
+ ☐ Study / Add support for Gulp
+ ☐ Create environment support (bundle.json set up by environment)

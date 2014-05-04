@@ -42,6 +42,11 @@ class MoveAssetsProcessor extends AssetsProcessor
         newPath = path.join @options.librariesDestinationPath, "library-assets", path.relative(@options.librariesPath, file.path)
         files.push src:file.path, dest:newPath
         file.path = newPath
+      for file in library.files when file.type is "BOWER"
+        newPath = path.join @options.librariesDestinationPath, "library-assets", path.relative(@options.bowerComponentsPath, file.path)
+        files.push src:file.path, dest:newPath
+        file.path = newPath
+        file.type = "LOCAL"
       for otherLibId in library.dependencies
         otherLib = carteroJSON.libraries[otherLibId]
         @moveFilesInLibrary(carteroJSON, otherLib, processedLibraries, files)
@@ -51,7 +56,7 @@ class MoveAssetsProcessor extends AssetsProcessor
       files: files
     @grunt.config( [ "copy", "project_cartero_move_library_files" ], copyOptions )
     @grunt.task.run "copy:project_cartero_move_library_files"
-    @logger.debug "created copy grunt job with options #{JSON.stringify(copyOptions, null, 2)}"
+    @logger.info "created copy grunt job with options #{JSON.stringify(copyOptions, null, 2)}"
 
   moveViewsAssets:(carteroJSON)=>
     Promise.resolve().then ()=>

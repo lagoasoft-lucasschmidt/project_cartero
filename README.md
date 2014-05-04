@@ -1,5 +1,6 @@
 # Project Cartero (in development phase)
-> Project Cartero is a tool that runs on [Grunt.js](http://gruntjs.com/), based on [Cartero v1](https://github.com/rotundasoftware/cartero/tree/cartero-1), that provides a way to manage your client-side code in web projects (Node ...). No direct support for browserify (like Cartero v1), if you wish that, please see [Cartero v2](https://github.com/rotundasoftware/cartero).
+> Project Cartero is a tool that runs on [Grunt.js](http://gruntjs.com/), based on [Cartero v1](https://github.com/rotundasoftware/cartero/tree/cartero-1), that provides a way to manage your client-side code in web projects (Node ...). No direct support for browserify (like Cartero v1), if you wish that, please see [Cartero v2](https://github.com/rotundasoftware/cartero). Support built in for bower components.
+If you wish to use bower, you can treat bower components like they were normal in project client side libraries.
 
 > The theory is that you have a bunch of views (normally template based) and you have client-side code (css/js/coffee...) for that view, and you have a set of libraries that your view may depend on.
 
@@ -73,6 +74,10 @@ You can view other internal options in the last section.
   		- destExt is the extension that should be assigned to the transformed file
   		- task is the name of the grunt task you want to call
   		- clean is a boolean that indicates if you want to remove the old files
+
+  bowerComponentsPath: null
+    # if you inform this field, a BowerLibraryProcessor will be added automatically.
+    # this means that you can include any bower dependency by using their name, eg: "jquery" in any place as you would with a normal library.
 
   logLevel: "warn"
   	# you can change the logLevel to try to detect problems

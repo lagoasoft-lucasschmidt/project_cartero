@@ -6,6 +6,7 @@ LibrariesDescriptorBuilder = require '../../model/librariesDescriptorBuilder'
 Library = require '../../model/library'
 LibraryCreator = require '../../model/libraryCreator'
 DefaultLibraryCreator = require '../libraryCreator/DefaultLibraryCreator'
+BowerLibraryCreator = require '../libraryCreator/BowerLibraryCreator'
 
 defaultOptions =
   libraryCreators:[DefaultLibraryCreator] # they are responsible to create a library, if they can. They must respect the interface LibraryCreator
@@ -17,8 +18,9 @@ class DefaultLibrariesDescriptorBuilder extends LibrariesDescriptorBuilder
     throw new Error("librariesPath is required") if !_.isString(@options.librariesPath) or @options.librariesPath.length is 0
     throw new Error("libraryCreators must be specified") if !_.isArray(@options.libraryCreators)
     # load library creators
-    @libraryCreators = @internalSetupLibraryCreators()
+    @internalSetupLibraryCreators()
     throw new Error("libraryCreators must be valid LibraryCreator instances") if @libraryCreators.length is 0
+    @info "Initiated libraryCreators as #{@getCreatorsNames()}"
 
     @_allLibraries = {} # it will be a map, that maps eg: mylib/subLib to Library instance
 
@@ -36,6 +38,11 @@ class DefaultLibrariesDescriptorBuilder extends LibrariesDescriptorBuilder
       else throw new Error("Cant initiate libraryCreator=#{libraryCreator}, since its not a function")
 
     @libraryCreators = _.filter @libraryCreators, (libraryCreator)-> libraryCreator?
+
+    if @options.bowerComponentsPath?
+      hasBowerCreator = false
+      hasBowerCreator = true for creator in @libraryCreators when creator instanceof BowerLibraryCreator
+      if !hasBowerCreator then @libraryCreators.push new BowerLibraryCreator(@options)
 
   internalSetupLibraryCreator:(creator)=>
     libraryCreator = new creator(@options)
@@ -61,7 +68,7 @@ class DefaultLibrariesDescriptorBuilder extends LibrariesDescriptorBuilder
       return null
 
   internalChooseLibraryCreator:(libraryId)=>
-    @trace "Trying to choose library creator for library id=#{libraryId}"
+    @trace "Trying to choose library creator for library id=#{libraryId} and creators=#{@getCreatorsNames()}"
     promises = (@internalCanLibraryCreatorCreateLibrary(libraryId, creator) for creator in @libraryCreators)
     Promise.all(promises)
     .then (answers)=>
@@ -70,7 +77,7 @@ class DefaultLibrariesDescriptorBuilder extends LibrariesDescriptorBuilder
           creator = @libraryCreators[i]
           @trace "Creator with name #{creator.name} can create library id=#{libraryId}"
           return creator
-      @warn "No creators can create library id=#{libraryId}"
+      @warn "No creators can create library id=#{libraryId}, answers=#{answers} and creators=#{@getCreatorsNames()}"
       return null
 
   internalCreateLibraryByLibraryCreator:(libraryId, creator)=>
@@ -99,6 +106,8 @@ class DefaultLibrariesDescriptorBuilder extends LibrariesDescriptorBuilder
         @internalCreateLibrary(libraryId)
 
   getCalculatedLibraries:()=> @_allLibraries
+
+  getCreatorsNames:()=> _.map @libraryCreators, (c)-> return c.name
 
 
 module.exports = DefaultLibrariesDescriptorBuilder
