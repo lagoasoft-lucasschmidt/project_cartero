@@ -3,7 +3,11 @@ path = require( "path" )
 calculateViewFiles = require('../component/calculateViewFiles/calculateAllViewFiles')(web:true)
 
 module.exports = calculateViewMetadata = (viewJSON, carteroJSON)->
-  calculatedFiles = calculateViewFiles viewJSON, carteroJSON
+  calculatedFiles = null
+  if viewJSON.calculatedFiles?
+    calculatedFiles = viewJSON.calculatedFiles
+  else
+    calculatedFiles = calculateViewFiles viewJSON, carteroJSON
 
   metadata = {}
   metadata.css = _.map calculatedFiles.cssFiles, (fileName)-> return "<link rel='stylesheet' href='" + fileName + "'></link>"

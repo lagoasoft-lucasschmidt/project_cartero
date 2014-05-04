@@ -75,6 +75,7 @@ module.exports = (grunt) ->
                         ,{task: "coffee", fileExt:"coffee", destExt:"js", clean:true}
                         # ,require('project-cartero/lib/component/processor/uglifyAssetsProcessor')
                         # ,require('project-cartero/lib/component/processor/concatAssetsProcessor')
+                        ,require('project-cartero/lib/component/processor/calculateAssetsProcessor')
                     ]
                     carteroFileDescriptorPath: __dirname
                     logLevel: "info"
@@ -91,6 +92,7 @@ module.exports = (grunt) ->
                         ,{task: "coffee", fileExt:"coffee", destExt:"js", clean:true}
                         ,{task: "uglify", fileExt:"js", destExt:"js"}
                         ,require('project-cartero/lib/component/processor/concatAssetsProcessor')
+                        ,require('project-cartero/lib/component/processor/calculateAssetsProcessor')
                     ]
                     carteroFileDescriptorPath: __dirname
                     logLevel: "info"

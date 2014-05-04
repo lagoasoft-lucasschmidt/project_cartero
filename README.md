@@ -108,9 +108,13 @@ You can describe a library by using *bundle.json* file. The following options ar
 
 ### 1. MoveAssetsProcessor
 
-This should always be the first one. This processor will move your library/assets files to your public destination folder. This means that when moving CSS, we will change all relative paths. *Do not use absolute paths in your CSS, I dont think it makes sense in this case.*
+This should always be the first one. This processor will move your library/assets files to your public destination folder.
 
-### 2. GruntAssetsProcessor
+### 2. CalculateAssetsProcessor
+
+This should always be the last one. This processor will calculate which files should be served for each template. This means that your express-hook wouldnt have to calculate anything.
+
+### 3. GruntAssetsProcessor
 
 This processor is used internally so we can transform your object descring a Grunt task, into an instance of a GruntAssetsProcessor. This processor will simply run a Grunt task, but before that, it will map correctly the new file names into cartero.json file.
 
@@ -123,7 +127,7 @@ To use this, you will define an object in the assetsProcessor array, and the fol
 - *task* is the name of the grunt task you want to call
 - *clean* is a boolean that indicates if you want to remove the old files
 
-### 3. ConcatAssetsProcessor
+### 4. ConcatAssetsProcessor
 
 This processor will join all the files (css, js) required for a view. This means that it will loop through all templates, and calculate all files that can be joined. This means files from templates extended, included, own files, and library files (directly and indirectly dependencies) that are *LOCAL* and not ```keepSeparate:true```.
 
@@ -132,8 +136,7 @@ Be aware, here, we process *css* files to replace relative URLs referenced, so i
 
 ## TODOs:
 
-- Always pre-calculate each template asset files in cartero.json, instead of doing in express-hook
-- Separate Base Code from Grunt related Code
+- Separate Base Code from Grunt related Code: grunt / core / express-hook
 - Study / Add support for Gulp
 - Create tests
 - Always Improve Docs
