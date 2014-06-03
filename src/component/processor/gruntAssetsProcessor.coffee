@@ -16,12 +16,25 @@ class GruntAssetsProcessor extends AssetsProcessor
     @task = processorOptions.task
     @clean = processorOptions.clean
 
+    @libraryFiles = processorOptions.libraryFiles
+    if @libraryFiles is undefined then @libraryFiles = true
+
+    @viewFiles = processorOptions.viewFiles
+    if @viewFiles is undefined then @viewFiles = true
+
 
   run:(carteroJSON, callback)=>
     Promise.resolve().then ()=>
       promises = []
-      promises.push @gruntCompileLibraryAssets(carteroJSON)
-      promises.push @gruntCompileViewsAssets(carteroJSON)
+
+      if @libraryFiles
+        promises.push @gruntCompileLibraryAssets(carteroJSON)
+      else promises.push Promise.resolve([])
+
+      if @viewFiles
+        promises.push @gruntCompileViewsAssets(carteroJSON)
+      else promises.push Promise.resolve([])
+
       Promise.all(promises)
     .spread (filesToDelete, otherFilesToDelete)=>
       filesToDelete = filesToDelete.concat otherFilesToDelete
