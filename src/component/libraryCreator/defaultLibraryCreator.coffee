@@ -1,4 +1,5 @@
 _ = require 'lodash'
+_s = require 'underscore.string'
 fs = require 'fs'
 path = require 'path'
 Promise = require 'bluebird'
@@ -82,7 +83,7 @@ class DefaultLibraryCreator extends LibraryCreator
       return _.defaults bundleJSON, kBundleDefaults
 
   internalCreateDependencies:(libraryId, libraryPath, libraries, options, bundleJSON)=>
-    dependencies = bundleJSON.dependencies
+    dependencies = @internalDiscoverParentLibraries(libraryId).concat(bundleJSON.dependencies or [])
     @trace "Trying to create dependencies for library id=#{libraryId} with dependencies=#{JSON.stringify(dependencies)}"
     if !(_.isArray(dependencies) and dependencies.length > 0)
       @trace "No dependencies to create for library id=#{libraryId}"
@@ -92,6 +93,17 @@ class DefaultLibraryCreator extends LibraryCreator
       Promise.all(promises).then (results)=>
         @trace "Correctly created dependencies for library id=#{libraryId}"
         return _.map results, (result)-> result.id
+
+  internalDiscoverParentLibraries:(libraryId)=>
+    if _s.include(libraryId, "/")
+      parentDependencies = []
+      base = libraryId
+      while _s.include(base, "/")
+        toRemove = _s.strRightBack(base, "/")
+        base = _s.strLeft(base, "/"+toRemove)
+        parentDependencies.unshift base
+      return parentDependencies
+    return []
 
   internalCreateLibraryFiles:(libraryId, libraryPath, libraries, options, bundleJSON)=>
     directoriesToFlatten = _.map bundleJSON.directoriesToFlatten, (dir)-> path.join(libraryPath, dir).toString()
@@ -129,7 +141,8 @@ class DefaultLibraryCreator extends LibraryCreator
     findFoldersInFolder(libraryPath, /\*./)
     .then (folders)=>
       filteredFolders = _.filter folders, (folderPath)->
-        !_.contains(bundleJSON.directoriesToIgnore, path.relative(libraryPath, folderPath))
+        relativePath = path.relative(libraryPath, folderPath)
+        !_.contains(bundleJSON.directoriesToIgnore, relativePath) and !_.contains(bundleJSON.directoriesToFlatten, relativePath)
       promises = (libraries.getLibrary(path.relative(options.librariesPath, folder)) for folder in filteredFolders)
       @trace "Trying to create sub-libraries for library id=#{libraryId} with folders=#{folders}, #{filteredFolders}"
       Promise.all promises

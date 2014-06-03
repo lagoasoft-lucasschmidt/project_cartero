@@ -4,6 +4,8 @@
  ☐ Separate Base Code from Grunt related Code: grunt / core / express-hook
  ☐ Support for Bower / Npm modules: means new LibraryProcessors
    ✔ Support for Bower @done (14-05-04 18:05)
+   ☐ Add bower options like keepSeparate
  ☐ Improve concat processor: you cant join all LOCAL files, if a LOCAL file depends on a REMOTE one
+   ☐ This can be solved by searching for all files, including remote ones, and group files that can be concated together. Problem: how to detect later the order? This means the concat processor should calculate as well. This is can be done.
  ☐ Study / Add support for Gulp
  ☐ Create environment support (bundle.json set up by environment)
