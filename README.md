@@ -131,6 +131,8 @@ To use this, you will define an object in the assetsProcessor array, and the fol
 - *destExt* is the extension that should be assigned to the transformed file
 - *task* is the name of the grunt task you want to call
 - *clean* is a boolean that indicates if you want to remove the old files
+- *libraryFiles* (default = true) is a boolean that determines if library files will be processed or not
+- *viewFiles* (default = true) is a boolean that determines if view files will be processed or not
 
 ### 4. ConcatAssetsProcessor
 
