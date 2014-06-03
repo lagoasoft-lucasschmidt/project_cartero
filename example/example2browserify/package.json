@@ -1,0 +1,36 @@
+{
+  "name": "Example",
+  "version": "0.0.1",
+  "private": true,
+  "main": ".app/server/index.js",
+  "scripts": {
+    "postinstall": "./node_modules/grunt-cli/bin/grunt min",
+    "start": "node .app/server"
+  },
+  "dependencies": {
+    "express": "3.5.x",
+    "coffee-script": "*",
+    "jade": "1.x.x",
+    "project-cartero": "*",
+    "grunt-cli": "*"
+  },
+  "devDependencies": {
+    "browserify": "^4.1.8",
+    "coffee-script": "*",
+    "grunt-browserify": "^2.1.0",
+    "grunt-contrib-clean": "0.x.x",
+    "grunt-contrib-coffee": "0.x.x",
+    "grunt-contrib-concat": "0.x.x",
+    "grunt-contrib-copy": "0.x.x",
+    "grunt-contrib-cssmin": "0.6.x",
+    "grunt-contrib-uglify": "0.3.x",
+    "grunt-contrib-watch": "0.x.x",
+    "grunt-nodemon": "*",
+    "grunt-parallel": "*",
+    "matchdep": "0.3.x"
+  },
+  "engines": {
+    "node": "0.10.x",
+    "npm": "1.x.x"
+  }
+}
